@@ -26,17 +26,7 @@ function normalizeName (name: string, options: Options): string {
 }
 
 export function generateTableInterface (tableNameRaw: string, tableDefinition: TableDefinition, options: Options) {
-    const tableName = options.transformTypeName(tableNameRaw)
-    let members = ''
-    Object.keys(tableDefinition).map(c => options.transformColumnName(c)).forEach((columnName) => {
-        members += `${columnName}: ${tableName}Fields.${normalizeName(columnName, options)};\n`
-    })
-
-    return `
-        export interface ${normalizeName(tableName, options)} {
-        ${members}
-        }
-    `
+    return '';
 }
 
 export function generateEnumType (enumObject: any, options: Options) {
@@ -52,17 +42,17 @@ export function generateEnumType (enumObject: any, options: Options) {
 
 export function generateTableTypes (tableNameRaw: string, tableDefinition: TableDefinition, options: Options) {
     const tableName = options.transformTypeName(tableNameRaw)
-    let fields = ''
+    let fields: string[] = []
     Object.keys(tableDefinition).forEach((columnNameRaw) => {
         let type = tableDefinition[columnNameRaw].tsType
         let nullable = tableDefinition[columnNameRaw].nullable ? '| null' : ''
         const columnName = options.transformColumnName(columnNameRaw)
-        fields += `export type ${normalizeName(columnName, options)} = ${type}${nullable};\n`
+        fields.push(`${normalizeName(columnName, options)}: ${type}${nullable};`)
     })
 
     return `
-        export namespace ${tableName}Fields {
-        ${fields}
+        export interface ${tableName} {
+        ${fields.join('\n')}
         }
     `
 }
